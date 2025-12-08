@@ -20,7 +20,7 @@ func GeneratePassword() string {
 	finalPool := []byte{}
 	
 	var length int = 20
-	
+
 	if includeDigits {
 		finalPool = append(finalPool, numbers...)
 	}
@@ -49,5 +49,5 @@ func GeneratePassword() string {
 }
 
 func main() {
-	fmt.Println(GeneratePassword())
+	fmt.Println("Generated Password:", GeneratePassword())
 }
