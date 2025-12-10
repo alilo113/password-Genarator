@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "pwman/internal/generator"
+	"math"
 )
 
 func charSizeSet() {
@@ -41,4 +42,8 @@ func charSizeSet() {
     if hasSymbol {
         poolSize += 32 // or whatever your symbol count actually is
     }
+}
+
+func entropyPerChar(poolSize int) float64 {
+	return math.Log2(float64(poolSize))
 }
