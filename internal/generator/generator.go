@@ -1,8 +1,7 @@
-package main
+package generator
 
 import (
 	"crypto/rand"
-	"fmt"
 	"math/big"
 )
 
@@ -12,33 +11,13 @@ func GeneratePassword() string {
 	upper   := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	symbols := []byte("!@#$%^&*()-_=+[]{}|;:,.<>?/~`")
 
-	includeDigits := true
-	includeLower  := true
-	includeUpper  := false
-	includeSymbols := true
+	finalPool := append(numbers, lower...)
+	finalPool = append(finalPool, symbols...)
 
-	finalPool := []byte{}
-	
-	var length int = 20
-
-	if includeDigits {
-		finalPool = append(finalPool, numbers...)
-	}
-	if includeLower {
-		finalPool = append(finalPool, lower...)
-	}
-	if includeUpper {
-		finalPool = append(finalPool, upper...)
-	}
-	if includeSymbols {
-		finalPool = append(finalPool, symbols...)
-	}
-
-	if len(finalPool) == 0 || length <= 0 {
-		return ""
-	}
+	length := 20
 
 	password := make([]byte, length)
+
 	for i := 0; i < length; i++ {
 		max := big.NewInt(int64(len(finalPool)))
 		n, _ := rand.Int(rand.Reader, max)
@@ -46,8 +25,4 @@ func GeneratePassword() string {
 	}
 
 	return string(password)
-}
-
-func main() {
-	fmt.Println("Generated Password:", GeneratePassword())
 }
