@@ -6,8 +6,8 @@ import (
     "math/big"
 )
 
-// This function is called from root.go
-func runGenerate() {
+// Accept length as argument
+func runGenerate(length int) {
     password := generatePassword(length)
     fmt.Println("Generated Password:", password)
 }

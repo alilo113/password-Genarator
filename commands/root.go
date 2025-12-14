@@ -11,10 +11,14 @@ var rootCmd = &cobra.Command{
     Use:   "pwman",
     Short: "CLI password manager",
     Run: func(cmd *cobra.Command, args []string) {
-        if gen {
-            runGenerate() // call the generate logic from generate.go
-            return
-        }
+        // Read flags from the command to make sure values are updated
+        cmd.Flags().GetInt("length") // ensures `length` is parsed correctly
+        cmd.Flags().GetBool("generate")
+
+		if gen || length != 16 {
+			runGenerate(length) // pass length explicitly
+			return
+		}
         println("No action specified. Use -g to generate a password.")
     },
 }
