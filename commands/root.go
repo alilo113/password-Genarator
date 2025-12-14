@@ -25,7 +25,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
     rootCmd.Flags().BoolVarP(&gen, "generate", "g", false, "Generate a password")
-    rootCmd.Flags().IntVarP(&length, "length", "l", 16, "Length of the password")
+    rootCmd.Flags().IntVarP(&length, "length", "l", 16, "Generate a password with a specified length")
 }
 
 func Execute() {
