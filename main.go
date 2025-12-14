@@ -1,7 +1,7 @@
 package main
 
-import "pwman/cmd"
+import "pwman/commands"
 
 func main() {
-    cmd.Execute()
+    commands.Execute()
 }
