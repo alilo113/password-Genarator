@@ -1,33 +1,17 @@
-package cmd
+package commands
 
 import (
     "crypto/rand"
     "fmt"
     "math/big"
-
-    "github.com/spf13/cobra"
 )
 
-var length int
-
-// generateCmd represents the generate command
-var generateCmd = &cobra.Command{
-    Use:   "generate",
-    Short: "Generate a secure password",
-    Run: func(cmd *cobra.Command, args []string) {
-        password := generatePassword(length)
-        fmt.Println(password)
-    },
+// This function is called from root.go
+func runGenerate() {
+    password := generatePassword(length)
+    fmt.Println("Generated Password:", password)
 }
 
-func init() {
-    rootCmd.AddCommand(generateCmd)
-
-    // Local flag for password length
-    generateCmd.Flags().IntVarP(&length, "length", "l", 16, "Length of the password")
-}
-
-// generatePassword generates a random password of length n
 func generatePassword(n int) string {
     charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}<>?"
     password := ""
