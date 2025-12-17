@@ -14,27 +14,28 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "pwman",
 	Short: "CLI password manager",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Flags().GetInt("length")
-		cmd.Flags().GetBool("generate")
-		cmd.Flags().GetBool("add")
+    Run: func(cmd *cobra.Command, args []string) {
+        cmd.Flags().GetInt("length")
+        cmd.Flags().GetBool("generate")
+        cmd.Flags().GetBool("add")
 
-		var generatedPassword string
-		if gen || length != 16 {
-			generatedPassword = runGenerate(length) // your existing runGenerate
-		}
+        if add {
+            runAdd("") // pass empty string if no generated password
+            return
+        }
 
-		if add {
-			runAdd(generatedPassword) // pass generated password to add
-			return
-		}
+        var generatedPassword string
+        if gen || length != 16 {
+            generatedPassword = runGenerate(length)
+        }
 
-		if generatedPassword != "" {
-			return
-		}
+        if generatedPassword != "" {
+            return
+        }
 
-		fmt.Println("No action specified. Use -g to generate or -a to add a password.")
-	},
+        fmt.Println("No action specified. Use -g to generate or -a to add a password.")
+    },
+
 }
 
 func init() {
