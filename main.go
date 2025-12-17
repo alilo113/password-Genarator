@@ -1,6 +1,6 @@
 package main
 
-import "pwman/commands"
+import "github.com/alilo113/pwman/commands"
 
 func main() {
     commands.Execute()
