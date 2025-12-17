@@ -10,10 +10,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+// --------------------
+// Data model
+// --------------------
 
 type Entry struct {
 	Site     string `json:"site"`
@@ -21,31 +25,56 @@ type Entry struct {
 	Password string `json:"password"` // encrypted
 }
 
-var storageFile = os.ExpandEnv("$HOME/.pwman/store.json")
+// ~/.pwman/store.json
+var storageFile = func() string {
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".pwman", "store.json")
+}()
 
-// --- Load/Save storage ---
+// --------------------
+// Storage helpers
+// --------------------
+
+func ensureStorageDir() error {
+	dir := filepath.Dir(storageFile)
+	return os.MkdirAll(dir, 0700)
+}
+
 func loadStorage() ([]Entry, error) {
 	if _, err := os.Stat(storageFile); os.IsNotExist(err) {
 		return []Entry{}, nil
 	}
-	data, err := ioutil.ReadFile(storageFile)
+
+	data, err := os.ReadFile(storageFile)
 	if err != nil {
 		return nil, err
 	}
+
 	var entries []Entry
-	err = json.Unmarshal(data, &entries)
-	return entries, err
+	if err := json.Unmarshal(data, &entries); err != nil {
+		return nil, err
+	}
+
+	return entries, nil
 }
 
 func saveStorage(entries []Entry) error {
+	if err := ensureStorageDir(); err != nil {
+		return err
+	}
+
 	data, err := json.MarshalIndent(entries, "", "  ")
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(storageFile, data, 0600)
+
+	return os.WriteFile(storageFile, data, 0600)
 }
 
-// --- Encryption / Decryption ---
+// --------------------
+// Crypto
+// --------------------
+
 func deriveKey(master string) []byte {
 	sum := sha256.Sum256([]byte(master))
 	return sum[:]
@@ -53,46 +82,62 @@ func deriveKey(master string) []byte {
 
 func encryptPassword(master, password string) (string, error) {
 	key := deriveKey(master)
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
+
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return "", err
 	}
+
 	nonce := make([]byte, gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return "", err
 	}
+
 	ciphertext := gcm.Seal(nonce, nonce, []byte(password), nil)
 	return hex.EncodeToString(ciphertext), nil
 }
 
 func decryptPassword(master, encryptedHex string) (string, error) {
 	key := deriveKey(master)
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
+
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return "", err
 	}
+
 	data, err := hex.DecodeString(encryptedHex)
 	if err != nil {
 		return "", err
 	}
+
 	nonceSize := gcm.NonceSize()
 	if len(data) < nonceSize {
 		return "", fmt.Errorf("ciphertext too short")
 	}
+
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-	return string(plaintext), err
+	if err != nil {
+		return "", err
+	}
+
+	return string(plaintext), nil
 }
 
-// --- Add password ---
+// --------------------
+// Commands
+// --------------------
+
 func runAdd(providedPassword string) {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -112,6 +157,7 @@ func runAdd(providedPassword string) {
 		fmt.Print("Password (leave empty to generate): ")
 		pwInput, _ := reader.ReadString('\n')
 		pwInput = strings.TrimSpace(pwInput)
+
 		if pwInput == "" {
 			password = generatePassword(16)
 			fmt.Println("Generated password:", password)
@@ -126,23 +172,30 @@ func runAdd(providedPassword string) {
 
 	encPassword, err := encryptPassword(master, password)
 	if err != nil {
-		fmt.Println("Error encrypting password:", err)
+		fmt.Println("Encryption failed:", err)
 		return
 	}
 
-	entries, _ := loadStorage()
+	entries, err := loadStorage()
+	if err != nil {
+		fmt.Println("Failed to load storage:", err)
+		return
+	}
+
 	entries = append(entries, Entry{
 		Site:     site,
 		Username: username,
 		Password: encPassword,
 	})
-	saveStorage(entries)
+
+	if err := saveStorage(entries); err != nil {
+		fmt.Println("Failed to save storage:", err)
+		return
+	}
 
 	fmt.Printf("Saved password for %s (%s)!\n", site, username)
 }
 
-
-// --- Get password ---
 func runGet() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -154,17 +207,24 @@ func runGet() {
 	master, _ := reader.ReadString('\n')
 	master = strings.TrimSpace(master)
 
-	entries, _ := loadStorage()
+	entries, err := loadStorage()
+	if err != nil {
+		fmt.Println("Failed to load storage:", err)
+		return
+	}
+
 	for _, e := range entries {
 		if e.Site == site {
 			password, err := decryptPassword(master, e.Password)
 			if err != nil {
-				fmt.Println("Error decrypting password. Wrong master?")
+				fmt.Println("Wrong master password or corrupted entry")
 				return
 			}
+
 			fmt.Printf("Site: %s\nUsername: %s\nPassword: %s\n", e.Site, e.Username, password)
 			return
 		}
 	}
+
 	fmt.Println("No entry found for site:", site)
 }
