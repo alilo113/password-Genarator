@@ -93,7 +93,7 @@ func decryptPassword(master, encryptedHex string) (string, error) {
 }
 
 // --- Add password ---
-func runAdd() {
+func runAdd(providedPassword string) {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Site: ")
@@ -104,12 +104,20 @@ func runAdd() {
 	username, _ := reader.ReadString('\n')
 	username = strings.TrimSpace(username)
 
-	fmt.Print("Password (leave empty to generate): ")
-	password, _ := reader.ReadString('\n')
-	password = strings.TrimSpace(password)
-	if password == "" {
-		password = generatePassword(16)
-		fmt.Println("Generated password:", password)
+	var password string
+	if providedPassword != "" {
+		password = providedPassword
+		fmt.Println("Using generated password:", password)
+	} else {
+		fmt.Print("Password (leave empty to generate): ")
+		pwInput, _ := reader.ReadString('\n')
+		pwInput = strings.TrimSpace(pwInput)
+		if pwInput == "" {
+			password = generatePassword(16)
+			fmt.Println("Generated password:", password)
+		} else {
+			password = pwInput
+		}
 	}
 
 	fmt.Print("Master password: ")
@@ -132,6 +140,7 @@ func runAdd() {
 
 	fmt.Printf("Saved password for %s (%s)!\n", site, username)
 }
+
 
 // --- Get password ---
 func runGet() {

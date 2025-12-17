@@ -7,9 +7,10 @@ import (
 )
 
 // Accept length as argument
-func runGenerate(length int) {
-    password := generatePassword(length)
-    fmt.Println("Generated Password:", password)
+func runGenerate(length int) string {
+	password := generatePassword(length)
+	fmt.Println("Generated password:", password)
+	return password
 }
 
 func generatePassword(n int) string {
