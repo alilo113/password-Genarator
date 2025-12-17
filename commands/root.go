@@ -9,6 +9,7 @@ var (
 	length int
 	gen    bool
 	add    bool
+    get  bool
 )
 
 var rootCmd = &cobra.Command{
@@ -18,9 +19,15 @@ var rootCmd = &cobra.Command{
         cmd.Flags().GetInt("length")
         cmd.Flags().GetBool("generate")
         cmd.Flags().GetBool("add")
+        cmd.Flags().GetBool("get")
 
         if add {
             runAdd("") // pass empty string if no generated password
+            return
+        }
+
+        if get {
+            runGet()
             return
         }
 
@@ -42,6 +49,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&gen, "generate", "g", false, "Generate a password")
 	rootCmd.Flags().IntVarP(&length, "length", "l", 16, "Generate a password with a specified length")
 	rootCmd.Flags().BoolVarP(&add, "add", "a", false, "Store a new password on your machine")
+    rootCmd.Flags().BoolVarP(&get, "get", "r", false, "Retrieve a stored password from your machine")    
 }
 
 func Execute() {
