@@ -1,4 +1,4 @@
-module pwman
+module github.com/alilo113/pwman
 
 go 1.23.6
 
