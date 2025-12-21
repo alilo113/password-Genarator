@@ -10,6 +10,7 @@ var (
 	gen    bool
 	add    bool
     get  bool
+    list bool
 )
 
 var rootCmd = &cobra.Command{
@@ -43,6 +44,12 @@ var rootCmd = &cobra.Command{
             return
         }
 
+        // List passwords
+        if list {
+            runList()
+            return
+        }
+
         // 4. Nothing requested
         if !gen && !add && !get {
             fmt.Println("No action specified. Use -g, -a, or -r.")
@@ -57,6 +64,7 @@ func init() {
 	rootCmd.Flags().IntVarP(&length, "length", "l", 16, "Generate a password with a specified length")
 	rootCmd.Flags().BoolVarP(&add, "add", "a", false, "Store a new password on your machine")
     rootCmd.Flags().BoolVarP(&get, "get", "r", false, "Retrieve a stored password from your machine")    
+    rootCmd.Flags().BoolVarP(&list, "list", "l", false, "List all stored passwords")
 }
 
 func Execute() {
