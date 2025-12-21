@@ -1,10 +1,12 @@
 package commands
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
-	"path/filepath"
+    "fmt"
+    "os"
+    "encoding/json"
+    "path/filepath"
+    "sort"
+    "strings"
 )
 
 func listPasswords() error {
