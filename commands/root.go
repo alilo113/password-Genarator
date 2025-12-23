@@ -11,6 +11,7 @@ var (
 	add    bool
     get  bool
     list bool
+    search string
 )
 
 var rootCmd = &cobra.Command{
@@ -54,9 +55,12 @@ var rootCmd = &cobra.Command{
         if !gen && !add && !get {
             fmt.Println("No action specified. Use -g, -a, or -r.")
         }
-    },
 
-
+        // Search passwords
+        if search != "" {
+            runSearch(search)
+            return
+        },
 }
 
 func init() {
@@ -65,6 +69,7 @@ func init() {
     rootCmd.Flags().BoolVarP(&add, "add", "a", false, "Store a new password on your machine")
     rootCmd.Flags().BoolVarP(&get, "get", "r", false, "Retrieve a stored password from your machine")
     rootCmd.Flags().BoolVarP(&list, "list", "s", false, "List all stored passwords")
+    rootCmd.Flags().StringVarP(&search, "search", "f", "", "Search for a password by site name or username")
 }
 
 func Execute() {
