@@ -49,9 +49,6 @@ var rootCmd = &cobra.Command{
             runSearch(search)
             return
         }
-
-        // Nothing requested
-        fmt.Println("No action specified. Use -g, -a, -r, -s, or -f.")
     },
 }
 
