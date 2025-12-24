@@ -12,6 +12,7 @@ var (
     get  bool
     list bool
     search string
+    copy string
 )
 
 var rootCmd = &cobra.Command{
@@ -49,6 +50,12 @@ var rootCmd = &cobra.Command{
             runSearch(search)
             return
         }
+
+        // Copy password to clipboard
+        if copy != ""{
+            copyToClipboard(copy)
+            return
+        }
     },
 }
 
@@ -59,6 +66,7 @@ func init() {
     rootCmd.Flags().BoolVarP(&get, "get", "r", false, "Retrieve a stored password from your machine")
     rootCmd.Flags().BoolVarP(&list, "list", "s", false, "List all stored passwords")
     rootCmd.Flags().StringVarP(&search, "search", "f", "", "Search for a password by site name or username")
+    rootCmd.Flags().StringVarP(&copy, "copy", "c", "", "Copy a stored password to clipboard by site name")
 }
 
 func Execute() {
