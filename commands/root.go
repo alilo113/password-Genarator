@@ -53,7 +53,7 @@ var rootCmd = &cobra.Command{
 
         // Copy password to clipboard
         if copy != ""{
-            copyToClipboard(copy)
+            runCopy()
             return
         }
     },
